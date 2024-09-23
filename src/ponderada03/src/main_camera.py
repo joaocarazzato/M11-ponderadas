@@ -4,7 +4,7 @@ import requests
 import serial
 
 # Endereço IP do servidor web da ESP32-CAM
-url = 'http://192.168.15.13/capture'
+url = 'http://10.128.0.27/capture'
 port = '/dev/ttyUSB0'  # Substitua pelo nome correto da sua porta serial
 baud_rate = 115200 
 

@@ -5,8 +5,8 @@
 #include <freertos/task.h>
 
 // Defina o nome da sua rede WiFi e senha
-const char* ssid = "Carazzato";
-const char* password = "Juliana@1977";
+const char* ssid = "Inteli.Iot";
+const char* password = "@Intelix10T#";
 
 #define BUFFER_SIZE 1024
 
@@ -102,7 +102,7 @@ esp_err_t sendImageHandler(httpd_req_t *req) {
 }
 
 // Inicializa o servidor HTTP no ESP32
-void startCameraServer() {
+void startCameraServer(void *pvParameters) {
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
   // Cria um manipulador de URI para o endpoint "/capture"
@@ -121,7 +121,11 @@ void startCameraServer() {
   } else {
     Serial.println("Falha ao iniciar o servidor HTTP");
   }
+  while (true) {
+    vTaskDelay(200 / portTICK_PERIOD_MS);  // Delay indefinitely
+  }
 }
+
 
 void setup() {
   Serial.begin(115200);
@@ -159,11 +163,12 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
+  
 
   if (psramFound()) {
     config.frame_size = FRAMESIZE_SVGA;
     config.jpeg_quality = 10;
-    config.fb_count = 2;
+    config.fb_count = 1;
   } else {
     config.frame_size = FRAMESIZE_SVGA;
     config.jpeg_quality = 12;
@@ -181,10 +186,11 @@ void setup() {
 
   // Cria a thread de captura de imagem
   xTaskCreatePinnedToCore(captureImageTask, "CapturaImagem", 4096, NULL, 1, NULL, 0);
+  xTaskCreatePinnedToCore(startCameraServer, "CameraServer", 4096, NULL, 1, NULL, 0);
   xTaskCreatePinnedToCore(captureDetectionTask, "CapturaDeteccao", 2048, NULL, 2, NULL, 0);
 
   // Inicia o servidor HTTP para lidar com a requisição de envio da imagem
-  startCameraServer();
+  // startCameraServer();
 }
 
 void loop() {
